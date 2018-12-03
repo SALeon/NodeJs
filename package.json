@@ -1,0 +1,27 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "",
+    "start": "nodemon -r @babel/register app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SALeon/NodeJs.git"
+  },
+  "author": "Siarhei Leanavets <Siarhei_Leanavets@epam.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SALeon/NodeJs/issues"
+  },
+  "homepage": "https://github.com/SALeon/NodeJs#readme",
+  "devDependencies": {
+    "@babel/core": "^7.2.0",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-stage-2": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "nodemon": "^1.18.7"
+  }
+}
