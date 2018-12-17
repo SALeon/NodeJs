@@ -4,6 +4,6 @@ export default class Product {
     }
 
     print(string) {
-        console.log(string);
+        // console.log(string);
     }
 }
