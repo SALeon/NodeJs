@@ -7,4 +7,4 @@ console.log(app);
 
 const user = new User();
 const product = new Product();
-dirwatcher.watch('models');
+dirwatcher.watch('data');
