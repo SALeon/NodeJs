@@ -11,11 +11,11 @@ class EmitterController extends EventEmitter {
             this.emit(EVENTS.changedDirwatcher, data);
         });
 
-        // this.on(EVENTS.changedDirwatcher, (stream) => {
+        this.on(EVENTS.changedDirwatcher, (stream) => {
 
-        //     // console.log(stream);
-        //     // console.log('- changed -');
-        // });
+            // console.log(stream);
+            // console.log('- changed -');
+        });
     }
 
     emitChangedEvent(data) {
