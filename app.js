@@ -13,7 +13,7 @@ const user = new User();
 const product = new Product();
 const dirwatcher = new Dirwatcher();
 const dirDataName = path.resolve(__dirname, 'data');
-dirwatcher.watch(dirDataName, 100000);
+dirwatcher.watch(dirDataName, 5000);
 const importer = new Importer();
 importer.import(dirDataName)
     .then(data => console.log(data, 'from app'));

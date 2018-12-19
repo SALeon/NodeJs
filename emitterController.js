@@ -8,6 +8,8 @@ class EmitterController extends EventEmitter {
 
     init() {
         this.on(EVENTS.changed, (data) => {
+            console.log('from emiter')
+            console.log(data)
             this.emit(EVENTS.changedDirwatcher, data);
         });
 

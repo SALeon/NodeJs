@@ -1,116 +1,104 @@
 import fs from 'fs';
 import nodePath from 'path';
+import process from 'process';
 import eventEmmiter from './emitterController';
 import {
     timingSafeEqual
 } from 'crypto';
+import {
+    runInNewContext
+} from 'vm';
+
 
 export default class Dirwatcher {
     constructor() {
         /*
-        form for directoriesFiles 
+        form for dirInfo
         {
-            'some path name': {
-               files: 'lis of file names',
-               stats: {
-                    'some data stats'
-               } 
-            },
+            'some path name': [{
+               fileName: 'name1',
+               changedTime: time
+               },
+               ....
+            ],
             ...
         }
          */
-        this.directoriesFiles = {};
+        this.dirInfo = {};
     }
 
     watch(path, delay) {
         this.initWather(path);
-        setInterval(() => this.checkDirectory(path), delay);
+        setInterval(() => this.watchFiles(path), delay);
     }
 
     initWather(path) {
-        if (!this.directoriesFiles[path]) {
-            this.getFilesInfo(path, this.directoriesFiles[path]);
+        if (!this.dirInfo[path]) {
+            this.dirInfo[path] = [];
+            this.getFilesInfo(path)
+                .then(files => this.dirInfo[path] = files);
         }
     }
 
-    checkDirectory(path) {
-        this.watchCountFiles(path);
-        this.watchChaingedFiles(path);
-    }
-
-    getMovedFiles(path, newFiles, isRemoved) {
-        return isRemoved ? newFiles.filter(value => !this.directoriesFiles[path].includes(value)) :
-            this.directoriesFiles[path].files.filter(value => !newFiles.includes(value));
-    }
-
-    watchCountFiles(path) {
-        const failsContainer = [];
-        this.getFilesInfo(path, failsContainer);
-
-        const changedFiles = this.getMovedFiles(path, files, isRemoved);
-        eventEmmiter.emitChangedEvent({
-            [path]: {
-                changedFiles,
-                action: isRemoved > 0 ? 'removed' : 'added'
-            }
-        });
-        this.directoriesFiles[path] = files;
-    }
-
-    watchChaingedFiles(path) {
-        if (isObjectEquals(this.directoriesFiles[path].stats))
-            eventEmmiter.emitChangedEvent({
-                [path]: {
-                    changedFiles,
-                    changed: 'changed'
-                }
-            });
-    }
-
-    // Current comparison is only one level deep
-    isObjectEquals(a, b) {
-        const aProps = Object.getOwnPropertyNames(a);
-        const bProps = Object.getOwnPropertyNames(b);
-
-        if (aProps.length !== bProps.length) {
-            return false;
-        }
-
-        for (let i = 0; i < aProps.length; i++) {
-            const propName = aProps[i];
-
-            if (a[propName] !== b[propName]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    getFilesInfo(path, container = []) {
-        fs.readdir(path, (err, files) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-
-            files.forEach(fileName => {
-                const filePath = nodePath.join(path, fileName);
-
-                fs.stat(filePath, (err, stats) => {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                    container.push({
-                        fileName,
-                        changedData: stats.ctime
-                    });
+    getFileActions(mainFiles, files, isDeleted = false) {
+        return mainFiles.reduce((accum, file) => {
+            const viewedFile = files.find(innerFile => innerFile.fileName === file.fileName);
+            if (!viewedFile) {
+                accum.push({
+                    action: isDeleted ? 'deleted' : 'added',
+                    fileName: file.fileName
                 });
-            });
+            }
+
+            if (viewedFile && (`${viewedFile.changedTime}` !== `${file.changedTime}`)) {
+                console.log(viewedFile)
+                console.log(file)
+
+                accum.push({
+                    action: 'changed',
+                    fileName: file.fileName
+                });
+            }
+
+            return [...accum];
+        }, []);
+    }
+
+    watchFiles(path) {
+        this.getFilesInfo(path).then(filesInfo => {
+            const changedFilesInfo = this.getChangedFilesInfo(path, filesInfo);
+            if (changedFilesInfo) {
+                eventEmmiter.emitChangedEvent(changedFilesInfo);
+            }
+            this.dirInfo[path] = filesInfo;
         });
     }
 
-    convertFiles() {
+    getChangedFilesInfo(path, files) {
+        const dif = this.dirInfo[path].length - files.length;
+        if (dif > 0) {
+            return this.getFileActions(this.dirInfo[path], files, true);
+        } else if (dif < 0) {
+            return this.getFileActions(files, this.dirInfo[path]);
+        }
+        return null;
+    }
 
+    getFilesInfo(path) {
+        return fs.promises.readdir(path)
+            .then(files => {
+                const statFiles = files.reduce((acc, fileName) => {
+                    const filePath = nodePath.join(path, fileName);
+                    return [...acc,
+                        fs.promises.stat(filePath).then(statInfo =>
+                            ({
+                                fileName,
+                                changedTime: statInfo.ctime
+                            })
+                        )
+                    ]
+                }, []);
+                return Promise.all(statFiles);
+            })
     }
 }
