@@ -1,9 +1,9 @@
 import fs from 'fs';
 import eventEmmiter from './emitterController';
 
-class Dirwatcher {
-    constructor() { 
-        this.files = [];
+export default class Dirwatcher {
+    constructor() {
+        this.directoriesFiles = {};
     }
 
     watch(path, delay) {
@@ -12,32 +12,39 @@ class Dirwatcher {
     }
 
     initWather(path) {
-        fs.readdir(path, (err, files) => {
-            this.files = files;
-            eventEmmiter.emitInitialRead(files);
-        });
+
+        if (!this.directoriesFiles[path]) {
+            fs.readdir(path, (err, files) => {
+                this.directoriesFiles[path] = files;
+
+            });
+        }
     }
 
     readDerictory(path) {
+
+        this.watchCountFiles(path);
+    }
+
+    getMovedFiles(path, newFiles, isRemoved) {
+        return isRemoved ? newFiles.filter(value => !this.directoriesFiles[path].includes(value)) :
+            this.directoriesFiles[path].filter(value => !newFiles.includes(value));
+    }
+
+    watchCountFiles(path) {
+
         fs.readdir(path, (err, files) => {
-            const isRemoved = this.files.length - files.length;
-            // TODO remove if, change it to 
+            const isRemoved = this.directoriesFiles[path].length - files.length;
             if (isRemoved) {
-                const changedFiles = this.getChangedFiles(files);
-                eventEmmiter.emitChanged({
-                    changedFiles,
-                    isRemoved: isRemoved > 0
+                const changedFiles = this.getMovedFiles(path, files, isRemoved);
+                eventEmmiter.emitChangedEvent({
+                    [path]: {
+                        changedFiles,
+                        moved: isRemoved > 0 ? 'removed' : 'added'
+                    }
                 });
-                this.files = files;
+                this.directoriesFiles[path] = files;
             }
         });
     }
-
-    getChangedFiles(newFiles, isRemoved) {
-        return isRemoved ? newFiles.filter(value => !this.files.includes(value)) :
-            this.files.filter(value => !newFiles.includes(value));
-    }
 }
-
-const dirwatcher = new Dirwatcher();
-export default dirwatcher;

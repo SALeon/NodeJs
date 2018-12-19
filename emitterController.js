@@ -1,33 +1,39 @@
 import EventEmitter from 'events';
 
-const EMMITTERS = {
-    changed: 'changed', 
-    initDirwatcher: 'dirwatcher:init',
+export const EVENTS = {
+    changed: 'changed',
+    changedDirwatcher: 'dirwatcher:changed'
 };
 class EmitterController extends EventEmitter {
 
     init() {
-        this.on(EMMITTERS.changed, (stream) => {
-            console.log(stream);
-            console.log('- changed -');
+        this.on(EVENTS.changed, (data) => {
+            this.emit(EVENTS.changedDirwatcher, data);
         });
 
-        this.once(EMMITTERS.initDirwatcher, (stream) => {
-            
-        });
+        // this.on(EVENTS.changedDirwatcher, (stream) => {
+
+        //     // console.log(stream);
+        //     // console.log('- changed -');
+        // });
     }
 
-    addSignleEmmiter() { 
-
+    emitChangedEvent(data) {
+        this.emit(EVENTS.changed, data);
     }
 
-    emitChanged(data) { 
-        this.emit(EMMITTERS.changed, data);
-    }
+    // listenChangedDirwatcherEvent() {
+    //     this.on(EVENTS.changed, (data) => {
+    //         this.emit(EVENTS.changedDirwatcher, data);
+    //     });
 
-    emitInitialRead(data) { 
-        this.emit(EMMITTERS.initDirwatcher, data);
-    }
+        // this.on(EVENTS.changedDirwatcher, (data) => {
+
+        //     // console.log(stream);
+        //     // console.log('- changed -');
+        // });
+
+    // }
 }
 
 const emitterController = new EmitterController();
