@@ -2,9 +2,9 @@ import path from 'path';
 import { app } from './config';
 import User from './models/User';
 import Product from './models/Product';
-import Dirwatcher from './Dirwatcher';
-import Importer from './Importer';
-import dirController, { EVENTS } from './dirController';
+import Dirwatcher from './src/dirwatcher';
+import Importer from './src/importer';
+import dirController, { EVENTS } from './src/dirController';
 
 console.log(app);
 
@@ -19,6 +19,9 @@ const importer = new Importer();
 dirController.on(EVENTS.changedDirwatcher, (data) => {
     data.forEach(value => {
         const { path } = value;
-        importer.import(path).then(data => console.log(data, 'from app'));
+        importer.import(path)
+            .then(data => console.log(data, 'assync readed'));
+        const files = importer.importSync(path);
+        console.log(files, 'sync readed');
     });
 });

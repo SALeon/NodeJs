@@ -31,19 +31,6 @@ class DirController extends EventEmitter {
     emitChangedEvent(data) {
         this.emit(EVENTS.changed, data);
     }
-
-    // listenChangedDirwatcherEvent() {
-    //     this.on(EVENTS.changed, (data) => {
-    //         this.emit(EVENTS.changedDirwatcher, data);
-    //     });
-
-    // this.on(EVENTS.changedDirwatcher, (data) => {
-
-    //     // console.log(stream);
-    //     // console.log('- changed -');
-    // });
-
-    // }
 }
 
 const dirController = new DirController();
