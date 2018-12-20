@@ -1,15 +1,12 @@
 import fs from 'fs';
 import nodePath from 'path';
-import process from 'process';
-import eventEmmiter from './emitterController';
-import {
-    timingSafeEqual
-} from 'crypto';
-import {
-    runInNewContext
-} from 'vm';
+import dirController from './dirController';
 
-
+export const ACTIONS = {
+    deleted: 'DELETED',
+    added: 'ADDED',
+    changed: 'CHANGED',
+};
 export default class Dirwatcher {
     constructor() {
         /*
@@ -42,24 +39,20 @@ export default class Dirwatcher {
 
     getFileActions(mainFiles, files, isDeleted = false) {
         return mainFiles.reduce((accum, file) => {
-            const viewedFile = files.find(innerFile => innerFile.fileName === file.fileName);
+            const viewedFile = files.find(innerFile => innerFile.path === file.path);
             if (!viewedFile) {
                 accum.push({
-                    action: isDeleted ? 'deleted' : 'added',
-                    fileName: file.fileName
+                    action: isDeleted ? ACTIONS.deleted : ACTIONS.added,
+                    path: file.path
                 });
             }
 
             if (viewedFile && (`${viewedFile.changedTime}` !== `${file.changedTime}`)) {
-                console.log(viewedFile)
-                console.log(file)
-
                 accum.push({
-                    action: 'changed',
-                    fileName: file.fileName
+                    action: ACTIONS.changed,
+                    path: file.path
                 });
             }
-
             return [...accum];
         }, []);
     }
@@ -67,8 +60,8 @@ export default class Dirwatcher {
     watchFiles(path) {
         this.getFilesInfo(path).then(filesInfo => {
             const changedFilesInfo = this.getChangedFilesInfo(path, filesInfo);
-            if (changedFilesInfo) {
-                eventEmmiter.emitChangedEvent(changedFilesInfo);
+            if (changedFilesInfo.length) {
+                dirController.emitChangedEvent(changedFilesInfo);
             }
             this.dirInfo[path] = filesInfo;
         });
@@ -78,10 +71,9 @@ export default class Dirwatcher {
         const dif = this.dirInfo[path].length - files.length;
         if (dif > 0) {
             return this.getFileActions(this.dirInfo[path], files, true);
-        } else if (dif < 0) {
+        } else {
             return this.getFileActions(files, this.dirInfo[path]);
         }
-        return null;
     }
 
     getFilesInfo(path) {
@@ -92,13 +84,13 @@ export default class Dirwatcher {
                     return [...acc,
                         fs.promises.stat(filePath).then(statInfo =>
                             ({
-                                fileName,
+                                path: filePath,
                                 changedTime: statInfo.ctime
                             })
                         )
                     ]
                 }, []);
                 return Promise.all(statFiles);
-            })
+            });
     }
 }

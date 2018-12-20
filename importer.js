@@ -1,25 +1,16 @@
-import emitterController, { EVENTS } from './emitterController';
+import csv from "csvtojson";
 
 export default class Importer {
 
     import(path) {
-        return new Promise((res, rej) => {
-            emitterController.on(EVENTS.changedDirwatcher, (data) => {
-                res(data);
-            });
-        });
-
-
+        console.log(path, 'path from promise of import file')
+        return csv().fromFile(path)
+            .then((data) => {
+                console.log(data);
+            })
     }
 
     importSync(path) {
-
+        
     }
-
-    // listenDirwatcherEvent() {
-    //     // emitterController.listenChangedDirwatcherEvent(path);
-    //     emitterController.on(EVENTS.changedDirwatcher, (data) => {
-    //         res(data);
-    //     });
-    // }
 }
