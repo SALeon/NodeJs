@@ -1,20 +1,26 @@
 import fs from 'fs';
 import nodePath from 'path';
-import dirController from './dirController';
+import { EventEmitter } from 'events';
 
 export const ACTIONS = {
-    deleted: 'DELETED',
-    added: 'ADDED',
-    changed: 'CHANGED',
+    DELETED: 'DELETED',
+    ADDED: 'ADDED',
+    CHANGED: 'CHANGED',
 };
-export default class Dirwatcher {
+
+export const DIRWATCHER_EVENTS = {
+    CHANGED: 'changed',
+};
+
+export default class Dirwatcher extends EventEmitter{
     constructor() {
+        super()
         /*
         form for dirInfo
         {
-            'some path name': [{
-               fileName: 'name1',
-               changedTime: time
+            'some directory': [{
+               path: 'pathFile',
+               action: 'some action'
                },
                ....
             ],
@@ -42,14 +48,14 @@ export default class Dirwatcher {
             const viewedFile = files.find(innerFile => innerFile.path === file.path);
             if (!viewedFile) {
                 accum.push({
-                    action: isDeleted ? ACTIONS.deleted : ACTIONS.added,
+                    action: isDeleted ? ACTIONS.DELETED : ACTIONS.ADDED,
                     path: file.path
                 });
             }
 
             if (viewedFile && (`${viewedFile.changedTime}` !== `${file.changedTime}`)) {
                 accum.push({
-                    action: ACTIONS.changed,
+                    action: ACTIONS.CHANGED,
                     path: file.path
                 });
             }
@@ -58,11 +64,13 @@ export default class Dirwatcher {
     }
 
     watchFiles(path) {
+
         this.getFilesInfo(path).then(filesInfo => {
             const changedFilesInfo = this.getChangedFilesInfo(path, filesInfo);
             if (changedFilesInfo.length) {
-                dirController.emitChangedEvent(changedFilesInfo);
+                this.emit(DIRWATCHER_EVENTS.CHANGED, changedFilesInfo);
             }
+
             this.dirInfo[path] = filesInfo;
         });
     }
