@@ -7,7 +7,6 @@ export const EVENTS = {
     removeAdedChanges: 'FILTER_ADED_CHANGES'
 };
 class DirController extends EventEmitter {
-
     init() {
         this.on(EVENTS.changed, (data) => {
             this.emit(EVENTS.removeAdedChanges, data);
@@ -18,14 +17,6 @@ class DirController extends EventEmitter {
             change.action !== ACTIONS.deleted);
             this.emit(EVENTS.changedDirwatcher, notDeleltedChanges)
         });
-
-        this.on(EVENTS.changedDirwatcher, (stream) => {
-
-        });
-    }
-
-    emitChangedEvent(data) {
-        this.emit(EVENTS.changed, data);
     }
 
     emitChangedEvent(data) {
