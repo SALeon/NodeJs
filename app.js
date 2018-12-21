@@ -10,15 +10,18 @@ console.log(app);
 const user = new User();
 const product = new Product();
 
-const watchedDir = path.resolve(__dirname, 'data');
-const importPath = path.resolve(__dirname, 'new');
+const watchedDirPath = path.resolve(__dirname, 'data');
+const file1Path = path.join(watchedDirPath, '1.csv');
 const dirwatcher = new Dirwatcher();
 const importer = new Importer();
-importer.setPath(importPath);
 
-dirwatcher.watch(watchedDir, 5000);
+dirwatcher.watch(watchedDirPath, 5000);
 dirwatcher.on(DIRWATCHER_EVENTS.CHANGED, data => {
     const exceptDeleteChanges = data.filter(change =>
         change.action !== ACTIONS.DELETED);
-    importer.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, exceptDeleteChanges);
+    importer.listenChanges(exceptDeleteChanges);
 });
+
+importer.import(file1Path).then(data => 
+    console.log(data, ' ====> imports async first time'));
+console.log(importer.importSync(file1Path), ' ====> imports sync first time');   

@@ -1,27 +1,59 @@
 import fs from 'fs';
-import { EventEmitter } from 'events';
+import {
+    EventEmitter
+} from 'events';
 import parse from 'csv-parse/lib/sync';
 
 export const IMPORTER_EVENTS = {
     CHANGED_DIRWATCHER: 'dirwatcher:changed'
 };
-export default class Importer extends EventEmitter{
-    setPath(path) {
-        this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, ([data]) => {
-            this.chaingedFilePath = data.path;
-            this.import(path).then(data => console.log(data, 'assync readed'));
-             console.log(this.importSync(path), 'sync readed');
+export default class Importer extends EventEmitter {
+    constructor() {
+        super();
+        this.listeningPaths = [];
+    }
+
+    listenChanges(changes) {
+        this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (paths) => {
+            paths.forEach(path => {
+                this.import(path).then(data => console.log(data, 'import if data change async'));
+                console.log(this.importSync(path), 'import if data change sync');
+            });
         });
+
+        this.filtterListeningPaths(changes);
+    }
+
+    filtterListeningPaths(changes) {
+        const changedPaths = changes.reduce((acc, change) => {
+            const changedPath = this.listeningPaths.find(path => path === change.path);
+            if (changedPath) {
+                return [...acc, changedPath];
+            }
+            return acc;
+        }, []);
+
+        if (changedPaths.length) {
+            this.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, changedPaths);
+        }
     }
 
     import(path) {
-        return fs.promises.readFile(this.chaingedFilePath)
+        this.addListenedPath(path);
+        return fs.promises.readFile(path)
             .then(data => this.convertFromCSV(data.toString()));
     }
 
     importSync(path) {
-        const data = fs.readFileSync(this.chaingedFilePath).toString();
+        this.addListenedPath(path);
+        const data = fs.readFileSync(path).toString();
         return this.convertFromCSV(data);
+    }
+
+    addListenedPath(path) {
+        if (this.listeningPaths.some(value => value !== path) || !this.listeningPaths.length) {
+            this.listeningPaths.push(path);
+        }
     }
 
     convertFromCSV(data) {
