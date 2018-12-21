@@ -1,8 +1,7 @@
 import fs from 'fs';
-import {
-    EventEmitter
-} from 'events';
+import { EventEmitter } from 'events';
 import parse from 'csv-parse/lib/sync';
+import { ACTIONS } from './dirwatcher';
 
 export const IMPORTER_EVENTS = {
     CHANGED_DIRWATCHER: 'dirwatcher:changed'
@@ -13,10 +12,18 @@ export default class Importer extends EventEmitter {
         this.listeningPaths = [];
     }
 
+    handleReadError(err) {
+        if (err.code = 'ENOENT') {
+            console.error('File not found!');
+        } else {
+            throw err;
+        }
+    }
+
     listenChanges() {
         if (!this.eventNames().includes(IMPORTER_EVENTS.CHANGED_DIRWATCHER)) {
-            this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (changes) => {
-               const paths = this.filtterListeningPaths(changes);
+            this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (data) => {
+                const paths = this.filtterListeningPaths(data);
                 paths.forEach(path => {
                     this.import(path).then(data => console.log(data, 'import if data change async'));
                     console.log(this.importSync(path), 'import if data change sync');
@@ -26,7 +33,8 @@ export default class Importer extends EventEmitter {
     }
 
     filtterListeningPaths(changes) {
-        return changes.reduce((acc, change) => {
+        return changes.filter(change => change.action !== ACTIONS.DELETED)
+            .reduce((acc, change) => {
             const changedPath = this.listeningPaths.find(path => path === change.path);
             if (changedPath) {
                 return [...acc, changedPath];
@@ -38,13 +46,18 @@ export default class Importer extends EventEmitter {
     import(path) {
         this.addListenedPath(path);
         return fs.promises.readFile(path)
-            .then(data => this.convertFromCSV(data.toString()));
+            .then(data => this.convertFromCSV(data.toString()))
+            .catch(err => this.handleReadError(err));
     }
 
     importSync(path) {
-        this.addListenedPath(path);
-        const data = fs.readFileSync(path).toString();
-        return this.convertFromCSV(data);
+        try {
+            this.addListenedPath(path);
+            const data = fs.readFileSync(path).toString();
+            return this.convertFromCSV(data);
+        } catch (err) {
+            this.handleReadError(err)
+        }
     }
 
     addListenedPath(path) {

@@ -2,7 +2,7 @@ import path from 'path';
 import { app } from './config';
 import User from './models/User';
 import Product from './models/Product';
-import Dirwatcher, { DIRWATCHER_EVENTS, ACTIONS } from './src/dirwatcher';
+import Dirwatcher, { DIRWATCHER_EVENTS } from './src/dirwatcher';
 import Importer, { IMPORTER_EVENTS } from './src/importer';
 
 console.log(app);
@@ -17,9 +17,12 @@ const importer = new Importer();
 
 dirwatcher.watch(watchedDirPath, 5000);
 dirwatcher.on(DIRWATCHER_EVENTS.CHANGED, data => {
-    const exceptDeleteChanges = data.filter(change =>
-        change.action !== ACTIONS.DELETED);
-    importer.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, exceptDeleteChanges);
+    if (!data) {
+        const err = new Error('No data!');
+        dirwatcher.emit(DIRWATCHER_EVENTS.ERROR, err);
+    } else {
+        importer.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, data);
+    }
 });
 
 importer.import(file1Path).then(data =>
