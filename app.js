@@ -19,9 +19,10 @@ dirwatcher.watch(watchedDirPath, 5000);
 dirwatcher.on(DIRWATCHER_EVENTS.CHANGED, data => {
     const exceptDeleteChanges = data.filter(change =>
         change.action !== ACTIONS.DELETED);
-    importer.listenChanges(exceptDeleteChanges);
+    importer.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, exceptDeleteChanges);
 });
 
-importer.import(file1Path).then(data => 
+importer.import(file1Path).then(data =>
     console.log(data, ' ====> imports async first time'));
-console.log(importer.importSync(file1Path), ' ====> imports sync first time');   
+console.log(importer.importSync(file1Path), ' ====> imports sync first time');
+importer.listenChanges();

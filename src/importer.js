@@ -13,29 +13,26 @@ export default class Importer extends EventEmitter {
         this.listeningPaths = [];
     }
 
-    listenChanges(changes) {
-        this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (paths) => {
-            paths.forEach(path => {
-                this.import(path).then(data => console.log(data, 'import if data change async'));
-                console.log(this.importSync(path), 'import if data change sync');
+    listenChanges() {
+        if (!this.eventNames().includes(IMPORTER_EVENTS.CHANGED_DIRWATCHER)) {
+            this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (changes) => {
+               const paths = this.filtterListeningPaths(changes);
+                paths.forEach(path => {
+                    this.import(path).then(data => console.log(data, 'import if data change async'));
+                    console.log(this.importSync(path), 'import if data change sync');
+                });
             });
-        });
-
-        this.filtterListeningPaths(changes);
+        }
     }
 
     filtterListeningPaths(changes) {
-        const changedPaths = changes.reduce((acc, change) => {
+        return changes.reduce((acc, change) => {
             const changedPath = this.listeningPaths.find(path => path === change.path);
             if (changedPath) {
                 return [...acc, changedPath];
             }
             return acc;
         }, []);
-
-        if (changedPaths.length) {
-            this.emit(IMPORTER_EVENTS.CHANGED_DIRWATCHER, changedPaths);
-        }
     }
 
     import(path) {
