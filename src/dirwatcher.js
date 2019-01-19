@@ -9,26 +9,15 @@ export const ACTIONS = {
 };
 
 export const DIRWATCHER_EVENTS = {
-    CHANGED: 'changed',
+    CHANGED: 'CHANGED',
     ERROR: 'ERROR'
 };
 
-export default class Dirwatcher extends EventEmitter{
+export default class DirWatcher extends EventEmitter{
     constructor() {
-        super()
-        /*
-        form for dirInfo
-        {
-            'some directory': [{
-               path: 'pathFile',
-               action: 'some action'
-               },
-               ....
-            ],
-            ...
-        }
-         */
+        super();
         this.dirInfo = {};
+        this.initEventErrorHandler();
     }
 
     initEventErrorHandler() {
@@ -38,12 +27,11 @@ export default class Dirwatcher extends EventEmitter{
     }
 
     watch(path, delay) {
-        this.initWather(path);
+        this.initWatcher(path);
         setInterval(() => this.watchFiles(path), delay);
-        this.initEventErrorHandler();
     }
 
-    initWather(path) {
+    initWatcher(path) {
         if (!this.dirInfo[path]) {
             this.dirInfo[path] = [];
             this.getFilesInfo(path)

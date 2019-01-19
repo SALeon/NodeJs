@@ -23,7 +23,7 @@ export default class Importer extends EventEmitter {
     listenChanges() {
         if (!this.eventNames().includes(IMPORTER_EVENTS.CHANGED_DIRWATCHER)) {
             this.on(IMPORTER_EVENTS.CHANGED_DIRWATCHER, (data) => {
-                const paths = this.filtterListeningPaths(data);
+                const paths = this.filterListeningPaths(data);
                 paths.forEach(path => {
                     this.import(path).then(data => console.log(data, 'import if data change async'));
                     console.log(this.importSync(path), 'import if data change sync');
@@ -32,7 +32,7 @@ export default class Importer extends EventEmitter {
         }
     }
 
-    filtterListeningPaths(changes) {
+    filterListeningPaths(changes) {
         return changes.filter(change => change.action !== ACTIONS.DELETED)
             .reduce((acc, change) => {
             const changedPath = this.listeningPaths.find(path => path === change.path);
