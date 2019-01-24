@@ -2,124 +2,81 @@
 const program = require("commander");
 
 const OPTIONS = {
-  file: '--file',
-  f: '-f',
-  action: '--action',
-  a: '-a',
-  help: '--help',
-  h: '-h'
+  "--file": "file",
+  "--action": "action",
+  "--help": "help",
 };
 
-const ACTIONS = {
-  reverse: 'reverse',
+const BRIEF_NAME_OPTIONS = {
+  "-f": "file",
+  "-a": "action",
+  "-h": "help"
 };
 
- const help = () => {
-     console.log("help action");
- };
+const help = err => {
+  if (err) console.error(err);
+  console.log("help action");
+};
 
-  const fileActions = () => {
-      console.log("file flag");
-  };
-
-  const actionActions = () => {
-      console.log("action flag");
-  };
-
-const reverse = (line) => {
-    console.log(line);
-    const reverted = line.split('').reverse().join('');
+const reverse = line => {
+    const reverted = line.split("").reverse().join("");
     console.log(reverted);
-}
-const getReversedString = (input) => {
-    console.log(input);
-    return input[0].includes('=') ? input.slice(1).join()
-        : input.slice(2).join();
-}
-
-const runOption = option => {
-  const options = {
-    [OPTIONS.f]: fileActions,
-    [OPTIONS.file]: fileActions,
-    [OPTIONS.a]: actionActions,
-    [OPTIONS.actions]: actionActions,
-    [OPTIONS.h]: help,
-    [OPTIONS.help]: help,
-  };
-  options[option] ? options[option]() : help();
 };
 
-const runActions = (action, payload) => {
-  const actions = {
-    [ACTIONS.reverse]: reverse,
-  };
-  actions[action] ? actions[action](payload) : help();
+const RULES = {
+  [OPTIONS["--action"]]: {
+        reverse: {
+          command: reverse,
+          needArg: false
+        }
+  },
+  [OPTIONS["--help"]]: help,
+  [OPTIONS["--file"]]: true,
 };
 
-const validateRules = input => {
-    if (!input.length) {
+const convertRules = input => {
+    return input.reduce((acc, rule) => {
+        const rules = (rule.search(/^--\w+=\w+/) !== -1) ?
+            rule.split("=").map(rule => OPTIONS[rule] ? OPTIONS[rule] : rule)
+            : [rule].map(rule => BRIEF_NAME_OPTIONS[rule] ? BRIEF_NAME_OPTIONS[rule] : rule);
+
+        return [...acc, ...rules];
+    }, []);
+};
+
+const getNextString = (arr, flag) => {
+  let index;
+    arr.some((val, i) => {
+        if (val.includes(flag)) {
+            index = ++i;
+            return true;
+        };
+        return false;
+    });
+    console.log(index, 'index')
+  return arr.slice(index).join(' ');
+};
+
+const runRules = (rules, stdin) => {
+    try {
+        if (rules[0] === OPTIONS["--help"]) {
+            help();
+            return;
+        }
+        const action = RULES[rules[0]][rules[1]];
+        const file = RULES[rules[2]];
+        const value = (file && action.needArg) ? rules[3] : getNextString(stdin, rules[1]);
+        action.command(value);
+    } catch (err) {
+        console.log("Incorrect Input");
         help();
-        return;
-    }
-
-    const firstOption = getFirstValidOption(input[0]);
-    if (firstOption) {
-        runOption(firstOption);
-    }
-
-    const actions = input.slice(0, 2);
-    const firstAction = actions.length ? getFirstValidAction(actions) : help();
-    if (firstAction) {
-        const string = getReversedString(input);
-        runActions(firstAction, string);
-    }
-
-    const options = input.slice(1, 3);
-    const secondaryOption = options.length ? getSecondValidOption(options) : help();
-    if (secondaryOption) {
-        runOption(secondaryOption);
     }
 };
 
-const getFirstValidOption = input => {
-  const option = input.split("=")[0];
-  const validOptions = {
-    [OPTIONS.help]: OPTIONS.help,
-    [OPTIONS.h]: OPTIONS.h,
-    [OPTIONS.action]: OPTIONS.action,
-    [OPTIONS.a]: OPTIONS.a
-  };
-  return validOptions[option] ? validOptions[option] : null;
-};
-
-const getSecondValidOption = inputs => {
-    let option = inputs[0].split("=");
-    const validOptions = {
-        [OPTIONS.f]: OPTIONS.f,
-        [OPTIONS.file]: OPTIONS.file,
-    };
-
-    if (validOptions[option[0]]) {
-        return validOptions[option[0]];
-    }
-
-    option = inputs.length > 1 ? inputs[1].split("=") : null;
-    return validOptions[option] ? validOptions[option] : null;
-};
-
-const getFirstValidAction = inputs => {
-    let option = inputs[0].split("=");
-    const validActions = {
-        [ACTIONS.reverse]: ACTIONS.reverse,
-    };
-
-    if (validActions[option[1]]) {
-        return validActions[option[1]];
-    }
-
-    option = inputs.length > 1 ? inputs[1].split("=") : null;
-    return validActions[option[1]] ? validActions[option[1]] : null;
+const main = stdin => {
+  const convertedRules = convertRules(stdin);
+  runRules(convertedRules, stdin);
 };
 
 const stdin = process.argv.slice(2);
-validateRules(stdin);
+main(stdin);
