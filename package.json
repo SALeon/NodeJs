@@ -5,7 +5,12 @@
   "main": "app.js",
   "scripts": {
     "test": "",
-    "start": "nodemon -r @babel/register app.js"
+    "start": "nodemon -r @babel/register app.js",
+    "ut-reverse": "utils/streams.js -a revert some string",
+    "ut-transform": "utils/streams.js --action=transform some string",
+    "ut-outputFile": "utils/streams.js -a outputFile --file=utils/streams.js",
+    "ut-convertFromFile": "utils/streams.js --action=convertFromFile -f data/2.csv",
+    "ut-convertToFile": "utils/streams.js -a revert some string"
   },
   "repository": {
     "type": "git",
@@ -23,6 +28,7 @@
     "@babel/preset-stage-2": "^7.0.0",
     "@babel/register": "^7.0.0",
     "csv-parse": "^4.2.0",
-    "nodemon": "^1.18.7"
+    "nodemon": "^1.18.7",
+    "through2": "^3.0.0"
   }
 }
