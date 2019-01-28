@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 const through2 = require('through2');
 const fs = require('fs');
-const parse = require('csv-parse/lib/sync');
-
+const split = require('split2');
 
 const OPTIONS = {
   '--file': 'file',
@@ -71,24 +70,54 @@ const outputFile = filePath => {
   reader.pipe(process.stdout);
 };
 
-const convertFromFile = filePath => {
+const convertFromFile = (filePath, outStream = process.stdout) => {
   let output = '';
 
   const reader = fs.createReadStream(filePath);
   reader.on('error', error =>
     console.error(`Error while reading file: ${filePath}\n\t ${error.message}`));
 
-  reader.on('data', (chunk) => {
-    output += chunk.toString('utf8');
-  });
+  outStream.on('error', error =>
+    console.error(`Error while writing file: ${filePath}\n\t ${error.message}`));
 
-  reader.on('end', () => {
-    const converted = parse(output, {
-      columns: true,
-      skip_empty_lines: true
+  const parseCSV = () => {
+    let values = [];
+    let isParseHead = true;
+    return through2.obj((data, enc, callback) => {
+      if (isParseHead) {
+        values = data.toString().split(',');
+        isParseHead = false;
+        return callback(null, null);
+      }
+      const line = data.toString().split(',');
+      const obj = {};
+      values.forEach((el, index) => {
+        obj[el] = line[index];
+      });
+      return callback(null, obj);
     });
-    console.log(converted);
-  });
+  };
+
+  const toJSON = () => {
+    let jsonObj = [];
+    return through2.obj(function (data, enc, callback) {
+        jsonObj.push(data);
+        callback(null, null);
+      },
+      function (callback) {
+        this.push(JSON.stringify(jsonObj));
+        callback();
+      });
+  };
+
+  reader.pipe(split()).pipe(parseCSV()).pipe(toJSON()).pipe(outStream);
+}
+
+
+const convertToFile = filePath => {
+  const writePath = filePath.replace(/(csv)$/g, 'json');
+  const ws = fs.createWriteStream(writePath);
+  convertFromFile(filePath, ws);
 }
 
 const RULES = {
@@ -108,6 +137,10 @@ const RULES = {
     convertFromFile: {
       command: convertFromFile,
       needArg: true
+    },
+    convertToFile: {
+      command: convertToFile,
+      needArg: true
     }
   },
   [OPTIONS['--help']]: help,
@@ -116,11 +149,9 @@ const RULES = {
 
 const convertRules = input => {
   return input.reduce((acc, rule) => {
-    const rules =
-      rule.search(/^--\w+=\w+/) !== -1 ?
-      rule.split('=').map(rule => (OPTIONS[rule] ? OPTIONS[rule] : rule)) : [rule].map(rule =>
-        BRIEF_NAME_OPTIONS[rule] ? BRIEF_NAME_OPTIONS[rule] : rule
-      );
+    const rules = rule.search(/^--\w+=\w+/) !== -1 ?
+      rule.split('=').map(rule => (OPTIONS[rule] ? OPTIONS[rule] : rule))
+        : BRIEF_NAME_OPTIONS[rule] ? [BRIEF_NAME_OPTIONS[rule]] : [rule];
 
     return [...acc, ...rules];
   }, []);
