@@ -10,7 +10,8 @@
     "ut-transform": "utils/streams.js --action=transform some string",
     "ut-outputFile": "utils/streams.js -a outputFile --file=utils/streams.js",
     "ut-convertFromFile": "utils/streams.js --action=convertFromFile -f data/2.csv",
-    "ut-convertToFile": "utils/streams.js -a convertToFile -f data/2.csv"
+    "ut-convertToFile": "utils/streams.js -a convertToFile -f data/2.csv",
+    "ut-cssBuilder": "utils/streams.js -a cssBuilder -f data/"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-stage-2": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "combined-stream": "^1.0.7",
     "csv-parse": "^4.2.0",
     "nodemon": "^1.18.7",
     "split2": "^3.1.0",

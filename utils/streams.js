@@ -2,6 +2,7 @@
 const through2 = require('through2');
 const fs = require('fs');
 const split = require('split2');
+const CombinedStream = require('combined-stream');
 
 const OPTIONS = {
   '--file': 'file',
@@ -17,6 +18,7 @@ const BRIEF_NAME_OPTIONS = {
 
 const helpMessage = `
 Usage: ./streams.js --action=<actionName> [--file=<fileName>, textToTransform]
+Usage: ./streams.js -a <actionName> [-f <fileName>, textToTransform]
 Options:
     -h, --help      Show help message
     -a, --action    Running action
@@ -120,6 +122,21 @@ const convertToFile = filePath => {
   convertFromFile(filePath, ws);
 }
 
+const cssBuilder = (dirPath) => {
+  const files = fs.readdirSync(dirPath)
+    .filter(file => file.includes('.css'));
+
+  const combinedStream = CombinedStream.create();
+  files.forEach(file => {
+    combinedStream.append(fs.createReadStream(dirPath + file));
+  });
+  combinedStream.append(fs.createReadStream('utils/nodejs-homework3.css'));
+  combinedStream.pipe(fs.createWriteStream(dirPath + 'combined.css'));
+  combinedStream.on('error', error => {
+        console.error(`Error while combined file: ${dirPath}\n\t ${error.message}`);
+  });
+}
+
 const RULES = {
   [OPTIONS['--action']]: {
     reverse: {
@@ -140,6 +157,10 @@ const RULES = {
     },
     convertToFile: {
       command: convertToFile,
+      needArg: true
+    },
+    cssBuilder: {
+      command: cssBuilder,
       needArg: true
     }
   },
@@ -166,12 +187,10 @@ const getNextString = (arr, flag) => {
     }
     return false;
   });
-  // console.log(index, 'index')
   return arr.slice(index).join(' ');
 };
 
 const runRules = (rules, stdin) => {
-  console.log(rules);
   try {
     if (rules[0] === OPTIONS['--help']) {
       help();
