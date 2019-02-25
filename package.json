@@ -4,8 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "",
-    "start": "nodemon -r @babel/register app.js"
+    "start": "nodemon -r @babel/register ./index.js",
+    "plain-text-server": "node ./http-servers/plain-text-server.js",
+    "html-server": "node ./http-servers/html-server.js",
+    "json-server": "node ./http-servers/json-server.js",
+    "echo-server": "node ./http-servers/echo-server.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +25,9 @@
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-stage-2": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "csv-parse": "^4.2.0",
-    "nodemon": "^1.18.7"
+    "express": "^4.16.4",
+    "nodemon": "^1.18.7",
+    "split2": "^3.1.0",
+    "through2": "^3.0.0"
   }
 }
