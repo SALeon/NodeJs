@@ -1,11 +1,11 @@
 import express from 'express';
-import productController, { EVENTS } from '../controllers/productController';
-
+import ProductController, { EVENTS } from '../controllers/productController';
 
 const routes = express.Router();
-const mainRout = '/products';
+export const mainRout = '/products';
 
 routes.get(`${mainRout}`, (req, res, next) => {
+    const productController = new ProductController();
     productController.getProducts();
     productController.on(EVENTS.getProducts, (products) => {
         res.json(products);
@@ -17,7 +17,8 @@ routes.get(`${mainRout}`, (req, res, next) => {
     });
 });
 
-routes.get(`${mainRout}/:id`, (req, res, next) => {
+    const productController = new ProductController();
+    routes.get(`${mainRout}/:id`, (req, res, next) => {
     productController.getProductId(req.params.id);
     productController.on(EVENTS.getProductId, (products) => {
         res.json(products);
@@ -30,19 +31,21 @@ routes.get(`${mainRout}/:id`, (req, res, next) => {
 });
 
 routes.get(`${mainRout}/:id/reviews`, (req, res, next) => {
+    const productController = new ProductController();
     productController.getReviews(req.params.id);
     productController.on(EVENTS.reviews, (products) => {
         res.json(products);
     });
 
     productController.on('error', err => {
-        console.error('GET product id: ', err);
+        console.error('GET product id reviews: ', err);
         res.sendStatus(500);
     });
 });
 
 routes.post(`${mainRout}/`, (req, res, next) => {
-    productController.setProduct(req.parsedQuery);
+    const productController = new ProductController();
+    productController.setProduct(req.body);
     productController.on(EVENTS.setProduct, products => {
         res.json(products);
     });

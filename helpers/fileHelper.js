@@ -16,10 +16,8 @@ class FileHelper extends EventEmitter {
 
     writeToFile(path, data, emitter, event) {
         this.readFromFile(path, this, EVENTS.readFIle);
-
         this.on(EVENTS.readFIle, (sourceData) => {
             const newData = this.concatArrData(sourceData, data);
-
             try {
                 const writableData = JSON.stringify(newData);
                 fs.writeFile(path, writableData, (err) => {
@@ -36,14 +34,7 @@ class FileHelper extends EventEmitter {
         try {
             const data = Array.isArray(newData) ? [...newData, ...sourceData] : [...[newData], ...sourceData];
             const uniqueData = data.reduce((acc, val) => {
-
-                if (acc[val.id] === val.id) {
-                    return acc;
-                }
-                return {
-                    ...acc,
-                    [val.id]: val
-                }
+                return acc[val.id] ? acc : { ...acc, [val.id]: val };
             }, {});
             return Object.values(uniqueData);
 

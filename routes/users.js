@@ -1,16 +1,17 @@
 import express from 'express';
-import userController, { EVENTS } from '../controllers/userController';
+import UserController, { EVENTS } from '../controllers/userController';
 
 const routes = express.Router();
-const mainRout = '/users';
+export const mainRout = '/users';
 
 routes.get(`${mainRout}`, (req, res, next) => {
+    const userController = new UserController();
     userController.getUsers();
     userController.on(EVENTS.getUsers, (products) => {
         res.json(products);
     });
 
-    userController.on('error', err => {
+    userController.on(EVENTS.getUsersError, err => {
         console.error('GET users: ', err);
         res.sendStatus(500);
     });

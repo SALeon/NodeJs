@@ -10,12 +10,4 @@ routes.get('/parsedCookies', (req, res, next) => {
     }
 });
 
-routes.get('/parsedQuery', (req, res, next) => {
-    try {
-        res.json(req.parsedQuery);
-    } catch (err) {
-        next(err);
-    }
-});
-
 export default routes;

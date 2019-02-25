@@ -1,9 +1,11 @@
+import passport from 'passport';
 import cookieParser from './cookieParser';
-import requestParser from './requestParser';
+import tokenVerificator from './tokenVerificator';
 
 const middlewares = [
     cookieParser,
-    requestParser
+    tokenVerificator,
+    passport.initialize()
 ];
 
 export default middlewares;
