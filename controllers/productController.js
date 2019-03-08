@@ -8,8 +8,8 @@ export const EVENTS = {
     setProduct: 'setProduct',
     getProductId: 'getProductId',
     reviews: 'reviews',
-    read: 'read',
-    write: 'write',
+    productRead: 'productRead',
+    productWrite: 'productWrite',
 }
 
 class ProductController extends EventEmitter {
@@ -19,12 +19,11 @@ class ProductController extends EventEmitter {
     }
 
     getProductId(id) {
-        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.read);
-        this.on(EVENTS.read, (products) => {
+        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.productRead);
+        this.on(EVENTS.productRead, (products) => {
             products.some(product => {
                 if (product.id === id) {
                     this.emit(EVENTS.getProductId, product);
-
                     return true;
                 }
                 return false;
@@ -33,8 +32,8 @@ class ProductController extends EventEmitter {
     }
 
     getReviews(id) {
-        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.read);
-        this.on(EVENTS.read, (products) => {
+        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.productRead);
+        this.on(EVENTS.productRead, (products) => {
             products.some(product => {
                 if (product.id === id) {
                     this.emit(EVENTS.reviews, product.reviews);
@@ -46,13 +45,11 @@ class ProductController extends EventEmitter {
     }
 
     setProduct(productData) {
-        fileHelper.writeToFile(PATH_TO_PRODUCTS, productData, this, EVENTS.write);
-        this.on(EVENTS.write, (product) => {
+        fileHelper.writeToFile(PATH_TO_PRODUCTS, productData, this, EVENTS.productWrite);
+        this.on(EVENTS.productWrite, (product) => {
             this.emit(EVENTS.setProduct, product);
         });
     }
 }
 
-const productController = new ProductController();
-
-export default productController;
+export default ProductController;
