@@ -2,7 +2,7 @@ import LocalStrategy from 'passport-local';
 import FacebookStrategy from 'passport-facebook';
 import GoogleStrategy from 'passport-google-oauth20';
 import TwitterStrategy from 'passport-twitter';
-import UserController, { EVENTS } from '../controllers/userController';
+import userController from '../controllers/userController';
 import { DEFAULT } from './defaultSetting';
 
 
@@ -13,21 +13,18 @@ export const passportSetup = (passport) => {
                 passwordField: 'password',
                 session: false,
             },
-            (email, password, done) => {
-                const userController = new UserController();
-                userController.extractUser({
-                    email,
-                    password
-                });
-                userController.on(EVENTS.extractUser, user => {
-                    done(null, user);
-                });
-
-                userController.on('error', err => {
-                    done(null, false, {
-                        message: 'user not found'
+            async (email, password, done) => {
+                try {
+                    const user = await userController.extractUser({
+                        email,
+                        password
                     });
-                });
+                    done(null, user);
+                } catch (err) {
+                    done(null, false, {
+                        message: err.message
+                    })
+                }
             }
         ));
 
@@ -58,11 +55,11 @@ export const passportSetup = (passport) => {
 
     passport.use(
         new TwitterStrategy.Strategy({
-                    consumerKey: DEFAULT.authTwitter.clientID,
-                    consumerSecret: DEFAULT.authTwitter.clientSecret,
-                    callbackURL: DEFAULT.authTwitter.callbackURL,
-                    includeEmail: true,
-                },
+                consumerKey: DEFAULT.authTwitter.clientID,
+                consumerSecret: DEFAULT.authTwitter.clientSecret,
+                callbackURL: DEFAULT.authTwitter.callbackURL,
+                includeEmail: true,
+            },
             (accessToken, tokenSecret, profile, done) => {
                 handleAuth('twitterToken', profile, done, accessToken);
             }
@@ -70,34 +67,36 @@ export const passportSetup = (passport) => {
     );
 }
 
-const handleAuth = (tokenName, profile, done, accessToken) => {
-    const userController = new UserController();
+const handleAuth = async (tokenName, profile, done, accessToken) => {
     const {
         id,
         displayName,
         emails
     } = profile;
-    userController.on(EVENTS.extractUser, user => {
+    try {
+        const user = await userController.extractUser({
+            email: emails[0].value
+        });
         done(null, user);
-    });
-    userController.on('error', err => {
+    } catch (err) {
         if (err.status === 404) {
-            userController.setUser({
+            const user = {
                 id,
-                [tokenName]: accessToken,
                 name: displayName,
                 email: emails[0].value,
-                password: 'some password'
+                password: 'some password',
+                facebookToken: '',
+                googleToken: '',
+                twitterToken: '',
+            }
+            const newUser = userController.setUser({
+                ...user,
+                [tokenName]: accessToken,
             });
+            done(null, newUser);
         } else {
             console.error(err);
             done(null, false)
         }
-    });
-    userController.on(EVENTS.setUser, user => {
-        done(null, user);
-    });
-    userController.extractUser({
-        id
-    });
+    }
 };

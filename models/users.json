@@ -1,48 +1,48 @@
 [{
-    "id": "1103716174666366976",
+    "id": 1,
     "twitterToken": "1103716174666366976-LhMIo2Fe6vN8iKgt1AtPBR3HfAnDAe",
     "name": "Serg",
     "email": "leon_sab@mail.ru",
     "password": "some password"
 }, {
-    "id": "111888350658989107010",
+    "id": 2,
     "googleToken": "ya29.GlzGBvbcptKRbl7y6mAhWRH9MyM1g536FMiygtCsq1AtoHpsxQ60ueW0NiLHbka379prIwgIRdpXxl6P10OqZdX_cnVi2bT35-Uv8kHcS66aVi68caqwtZ2UxnKn2Q",
     "name": "Сергей Леоновец",
     "email": "leonsab16@gmail.com",
     "password": "some password"
 }, {
-    "id": "2066193540095848",
+    "id": 3,
     "facebookToken": "EAAE11FZCZBetYBABT2nDxxEfloBzbqEfd3EazsvZBkYCpaCZBp2AHEK8pBZCIQphcnQLSyDqITaUJ5hB7Gf8QQuETsvXbNfPZCfrgdZBZC1eHh6If4cN6krg0w8d9BxqNxNzbosOLS90nsxHsVdTLNe2wZAvCn6WrOQDFW5ZA2tQZAW6wZDZD",
     "name": "Сергей Леоновец",
     "email": "leon_sab@mail.ru",
     "password": "some password"
 }, {
-    "id": "user_1",
+    "id": 4,
     "name": "name_1",
     "email": "email_1",
     "password": "password_1"
 }, {
-    "id": "user_2",
+    "id": 5,
     "name": "name_2",
     "email": "email_2",
     "password": "password_2"
 }, {
-    "id": "user_3",
+    "id": 6,
     "name": "name_3",
     "email": "email_3",
     "password": "password_3"
 }, {
-    "id": "user_4",
+    "id": 7,
     "name": "name_4",
     "email": "email_4",
     "password": "password_4"
 }, {
-    "id": "user_5",
+    "id": 8,
     "name": "name_5",
     "email": "email_5",
     "password": "password_5"
 }, {
-    "id": "user_6",
+    "id": 9,
     "name": "name_6",
     "email": "email_6",
     "password": "password_6"

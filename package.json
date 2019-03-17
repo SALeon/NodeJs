@@ -4,11 +4,18 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -r @babel/register ./index.js",
+    "start": "nodemon --inspect -r @babel/register ./index.js",
     "plain-text-server": "node ./http-servers/plain-text-server.js",
     "html-server": "node ./http-servers/html-server.js",
     "json-server": "node ./http-servers/json-server.js",
-    "echo-server": "node ./http-servers/echo-server.js"
+    "echo-server": "node ./http-servers/echo-server.js",
+    "pg-init": "docker run --name postgres-0 -e POSTGRES_PASSWORD=password -e POSTGRES_DB=postgres-0 -e POSTGRES_USER=user -d -p 5430:5432 postgres:alpine",
+    "pg-start": "docker start -i postgres-0",
+    "pg-remove": "docker rm -f postgres-0",
+    "db-migration": "node_modules/.bin/sequelize db:migrate",
+    "db-migration-revert": "node_modules/.bin/sequelize db:migrate:undo:all",
+    "db-seed": "node_modules/.bin/sequelize db:seed:all",
+    "sq-init": "node_modules/.bin/sequelize init"
   },
   "repository": {
     "type": "git",
@@ -22,9 +29,11 @@
   "homepage": "https://github.com/SALeon/NodeJs#readme",
   "devDependencies": {
     "@babel/core": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-stage-2": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.3.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
@@ -35,6 +44,10 @@
     "passport-google-oauth20": "^1.0.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.4",
+    "pg": "^7.9.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^5.1.0",
+    "sequelize-cli": "^5.4.0",
     "split2": "^3.1.0",
     "through2": "^3.0.0"
   },

@@ -1,7 +1,7 @@
 export const DEFAULT = {
     port: 8082,
     key: 'mysupersecretkey',
-    tokenLive: '100',
+    tokenLive: '3h',
     authFacebook: {
         clientID: '340661236562646',
         clientSecret: 'ea4df71ede7819baea3de62509468e03',

@@ -1,50 +1,45 @@
-import { EventEmitter } from 'events';
-import path from 'path';
-import fileHelper from '../helpers/fileHelper';
-
-const PATH_TO_USERS = path.resolve(__dirname, '../models/users.json');
-export const EVENTS = {
-    getUsers: 'getUsers',
-    setUser: 'setUser',
-    extractUser: 'extractUser',
-    userRead: 'userRead',
-    userWrite: 'userWrite',
-}
-
-class UserController extends EventEmitter {
+import User from '../models/User';
+import sequelize from '../models';
+import Error from '../helpers/customError'
+class UserController {
     getUsers() {
-        fileHelper.readFromFile(PATH_TO_USERS, this, EVENTS.getUsers);
+        return User.findAll();
     }
 
-    setUser(user) {
-        fileHelper.writeToFile(PATH_TO_USERS, user, this, EVENTS.userWrite)
-        this.on(EVENTS.userWrite, user => {
-            this.emit(EVENTS.setUser, user);
-        });
-    }
-
-    extractUser(requiredUser) {
-        if (requiredUser.email && requiredUser.password || requiredUser.id) {
-            this.on(EVENTS.userRead, (users) => {
-                const matchedUser = users.find(user =>
-                    user.email === requiredUser.email && user.password === requiredUser.password
-                    || user.id === requiredUser.id
-                );
-
-                matchedUser ? this.emit(EVENTS.extractUser, matchedUser) :
-                    this.userNotFoundError();
+    async setUser(user) {
+        delete user.id;
+        let transaction;
+        try {
+            transaction = await sequelize.transaction();
+            await User.create({
+                ...user
+            }, {
+                transaction
             });
-            fileHelper.readFromFile(PATH_TO_USERS, this, EVENTS.userRead);
-        } else {
-            this.userNotFoundError();
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
         }
     }
 
-    userNotFoundError() {
-        const err = {};
-        err.status = 404;
-        this.emit('error', err);
+    extractUser(requiredUser) {
+        const { email, password } = requiredUser;
+        if (email && password) {
+            return User.findOne({
+                where: {
+                    email,
+                    password
+                }
+            });
+
+        } else if (email) {
+            return User.findOne({
+                where: { email }
+            });
+        } else {
+            throw new Error(404, 'user not found');
+        }
     }
 }
 
-export default UserController;
+export default new UserController();
