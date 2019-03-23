@@ -1,55 +1,36 @@
-import { EventEmitter } from 'events';
-import path from 'path';
-import fileHelper from '../helpers/fileHelper';
+import Product from '../models/Product';
+import sequelize from '../models';
 
-const PATH_TO_PRODUCTS = path.resolve(__dirname, '../models/products.json');
-export const EVENTS = {
-    getProducts: 'getProducts',
-    setProduct: 'setProduct',
-    getProductId: 'getProductId',
-    reviews: 'reviews',
-    productRead: 'productRead',
-    productWrite: 'productWrite',
-}
-
-class ProductController extends EventEmitter {
+class ProductController {
 
     getProducts() {
-        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.getProducts);
+        return Product.findAll();
     }
 
-    getProductId(id) {
-        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.productRead);
-        this.on(EVENTS.productRead, (products) => {
-            products.some(product => {
-                if (product.id === id) {
-                    this.emit(EVENTS.getProductId, product);
-                    return true;
-                }
-                return false;
-            });
-        });
+   getProduct(id) {
+        return Product.findByPk(id);
     }
 
     getReviews(id) {
-        fileHelper.readFromFile(PATH_TO_PRODUCTS, this, EVENTS.productRead);
-        this.on(EVENTS.productRead, (products) => {
-            products.some(product => {
-                if (product.id === id) {
-                    this.emit(EVENTS.reviews, product.reviews);
-                    return true;
-                }
-                return false;
-            });
+       return Product.findOne({
+            where: { id },
+            attributes: ['reviews']
         });
     }
 
-    setProduct(productData) {
-        fileHelper.writeToFile(PATH_TO_PRODUCTS, productData, this, EVENTS.productWrite);
-        this.on(EVENTS.productWrite, (product) => {
-            this.emit(EVENTS.setProduct, product);
-        });
+    async setProduct(productData) {
+        let transaction;
+        try {
+            transaction = await sequelize.transaction();
+            await Product.create({...productData}, {
+                transaction
+            });
+            await transaction.commit();
+            return transaction.afterCommit = await Product.findByPk(productData.id);
+        } catch (err) {
+            await transaction.rollback();
+        }
     }
 }
 
-export default ProductController;
+export default new ProductController();

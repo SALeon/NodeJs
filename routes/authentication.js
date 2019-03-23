@@ -2,7 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import session from 'express-session';
-import UserController, { EVENTS } from '../controllers/userController';
+import userController from '../controllers/userController';
 import { DEFAULT } from '../config/defaultSetting';
 
 const routes = express.Router();
@@ -35,8 +35,8 @@ routes.get(`${mainRout}/facebook`,
 
 routes.get(
     `${mainRout}/facebook/callback`,
-    passport.authenticate("facebook", {
-        failureRedirect: `/`,
+    passport.authenticate('facebook', {
+        failureRedirect: '/',
         session: false
     }),
     (req, res) => {
@@ -127,9 +127,13 @@ routes.get(`${mainRout}/twitter/callback`,
     }
 );
 
-const authenticatedRes = (res, body, withTokenRes) => {
-    const userController = new UserController();
-    userController.on(EVENTS.extractUser, user => {
+const authenticatedRes = async (res, body, withTokenRes) => {
+    const { email, password } = body;
+    try {
+        const user = await userController.extractUser({
+            email,
+            password
+        });
         jwt.sign({
             sub: user.id,
             username: user.name
@@ -145,11 +149,9 @@ const authenticatedRes = (res, body, withTokenRes) => {
                 withTokenRes(user, token);
             }
         });
-    });
-    userController.on('error', err => {
+    } catch (err) {
         userNotFoundRes(err, res)
-    });
-    userController.extractUser(body);
+    }
 }
 
 const userNotFoundRes = (err, res) => {
