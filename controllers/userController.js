@@ -1,17 +1,13 @@
-import { EventEmitter } from 'events';
-import path from 'path';
-import fileHelper from '../helpers/fileHelper';
-
-const PATH_TO_USERS = path.resolve(__dirname, '../models/users.json');
-export const EVENTS = {
-    getUsers: 'getUsers',
-}
-
-class ProductController extends EventEmitter {
+import User from '../models/user'
+class UserController {
     getUsers() {
-        fileHelper.readFromFile(PATH_TO_USERS, this, EVENTS.getUsers);
+        return User.find();
+    }
+
+    deleteById(id) {
+        return User.findOneAndDelete({ id });
     }
 }
 
-const productController = new ProductController();
-export default productController;
+const userController = new UserController();
+export default userController;

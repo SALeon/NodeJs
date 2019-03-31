@@ -2,7 +2,7 @@
     "id": "1",
     "name": "Product 1",
     "detail": "Lorem ipsum dolor sit amet",
-    "price": "99",
+    "price": 99,
     "offer": "BOGOF",
     "image": "http://placehold.it/300x300/999/CCC",
     "reviews": ["user_1", "user_2", "user_3"]
@@ -10,7 +10,7 @@
     "id": "2",
     "name": "Product 2",
     "detail": "Lorem ipsum dolor sit amet",
-    "price": "99",
+    "price": 99,
     "offer": "BOGOF",
     "image": "http://placehold.it/300x300/999/CCC",
     "reviews": ["user_4", "user_1", "user_6"]
@@ -18,7 +18,7 @@
     "id": "3",
     "name": "Product 3",
     "detail": "Lorem ipsum dolor sit amet",
-    "price": "99",
+    "price": 99,
     "offer": "BOGOF",
     "image": "http://placehold.it/300x300/999/CCC",
     "reviews": ["user_4", "user_1", "user_6"]
@@ -26,7 +26,7 @@
     "id": "4",
     "name": "Product 1",
     "detail": "Lorem ipsum dolor sit amet",
-    "price": "99",
+    "price": 99,
     "info": "This is the latest and greatest product from Derp corp.",
     "image": "http://placehold.it/300x300/999/CCC",
     "reviews": ["user_4", "user_5", "user_6"]
