@@ -4,11 +4,15 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -r @babel/register ./index.js",
+    "start": "nodemon --inspect -r @babel/register ./index.js",
     "plain-text-server": "node ./http-servers/plain-text-server.js",
     "html-server": "node ./http-servers/html-server.js",
     "json-server": "node ./http-servers/json-server.js",
-    "echo-server": "node ./http-servers/echo-server.js"
+    "echo-server": "node ./http-servers/echo-server.js",
+    "mongo-init": "docker run --name mongo_0 -p 27017:27017 -d mongo --smallfiles",
+    "mongo-seed": "node -r @babel/register ./database/seedMongoDB.js",
+    "mongo-start": "docker start -i mongo_0",
+    "mongo-remove": "docker rm -f mongo_0"
   },
   "repository": {
     "type": "git",
@@ -22,10 +26,13 @@
   "homepage": "https://github.com/SALeon/NodeJs#readme",
   "devDependencies": {
     "@babel/core": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.4.0",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-stage-2": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.4.2",
     "express": "^4.16.4",
+    "mongoose": "^5.4.20",
     "nodemon": "^1.18.7",
     "split2": "^3.1.0",
     "through2": "^3.0.0"

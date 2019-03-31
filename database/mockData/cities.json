@@ -1,0 +1,25 @@
+[{
+    "name": "Brest",
+    "country": "Belarus",
+    "capital": false,
+    "location": {
+        "lat": "52.097621",
+        "long": "23.734050"
+    }
+}, {
+    "name": "NewYork",
+    "country": "USA",
+    "capital": false,
+    "location": {
+        "lat": "40.730610",
+        "long": "-73.935242"
+    }
+}, {
+    "name": "Austin",
+    "country": "USA",
+    "capital": false,
+    "location": {
+        "lat": "30.266926",
+        "long": "-97.750519"
+    }
+}]

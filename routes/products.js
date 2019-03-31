@@ -1,57 +1,58 @@
 import express from 'express';
-import productController, { EVENTS } from '../controllers/productController';
+import productController from '../controllers/productController';
 
 
 const routes = express.Router();
 const mainRout = '/products';
 
-routes.get(`${mainRout}`, (req, res, next) => {
-    productController.getProducts();
-    productController.on(EVENTS.getProducts, (products) => {
+routes.get(`${mainRout}`, async (req, res, next) => {
+    try {
+        const products = await productController.getProducts();
         res.json(products);
-    });
-
-    productController.on('error', err => {
-        console.error('GET products: ', err);
+    } catch (err) {
+        console.error(err);
         res.sendStatus(500);
-    });
+    }
 });
 
-routes.get(`${mainRout}/:id`, (req, res, next) => {
-    productController.getProductId(req.params.id);
-    productController.on(EVENTS.getProductId, (products) => {
-        res.json(products);
-    });
-
-    productController.on('error', err => {
-        console.error('GET product id: ', err);
+routes.get(`${mainRout}/:id`, async (req, res, next) => {
+    try {
+        const product = await productController.getProductId(req.params.id);
+        product ? res.json(product) : res.status(404).send('product not found');
+    } catch (err) {
+        console.error(err);
         res.sendStatus(500);
-    });
+    }
 });
 
-routes.get(`${mainRout}/:id/reviews`, (req, res, next) => {
-    productController.getReviews(req.params.id);
-    productController.on(EVENTS.reviews, (products) => {
-        res.json(products);
-    });
-
-    productController.on('error', err => {
-        console.error('GET product id: ', err);
+routes.get(`${mainRout}/:id/reviews`, async (req, res, next) => {
+    try {
+        const reviews = await productController.getReviews(req.params.id);
+        reviews && reviews.length ? res.json(reviews) : res.status(404).send('product not found');
+    } catch (err) {
+        console.error(err);
         res.sendStatus(500);
-    });
+    }
 });
 
-routes.post(`${mainRout}/`, (req, res, next) => {
-    productController.setProduct(req.parsedQuery);
-    productController.on(EVENTS.setProduct, products => {
-        res.json(products);
-    });
-
-    productController.on('error', err => {
-        console.error('POST product: ', err);
+routes.post(`${mainRout}/`, async (req, res, next) => {
+    try {
+        const product = await productController.setProduct(req.parsedQuery);
+        product ? res.json(product) : res.status(400).send('product not added');
+        res.json(product);
+    } catch (err) {
         res.sendStatus(500);
-    });
+    }
+});
 
+
+routes.delete(`${mainRout}/:id`, async (req, res, next) => {
+    try {
+        const product = await productController.deleteById(req.params.id);
+        product ? res.json(product) : res.status(404).send('product not found');
+    } catch (err) {
+        res.sendStatus(500);
+    }
 });
 
 export default routes;
