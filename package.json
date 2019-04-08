@@ -36,5 +36,9 @@
     "nodemon": "^1.18.7",
     "split2": "^3.1.0",
     "through2": "^3.0.0"
+  },
+  "dependencies": {
+    "swagger-ui-express": "^4.0.2",
+    "yamljs": "^0.3.0"
   }
 }
