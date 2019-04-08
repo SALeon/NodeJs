@@ -1,0 +1,362 @@
+---
+swagger: "2.0"
+info:
+  description: This is a sample NodeJs server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or oan [irc.freenode.net,
+  version: 1.0.0
+  title: NodeJs-GMP API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0ac
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+- name: city
+  description: Everything about your city
+- name: product
+  description: Everything about product
+- name: user
+  description: Operations about user
+paths:
+  /cities:
+    get:
+      tags:
+      - city
+      summary: Return random city
+      operationId: getRandomCity
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/city'
+        400:
+          description: Invalid status value
+    post:
+      tags:
+      - city
+      summary: Add an new city
+      operationId: setCity
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: City object that needs to be added to the store
+        required: true
+        schema:
+          $ref: '#/definitions/city'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/city'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: City not found
+        405:
+          description: Validation exception
+  /cities/{_id}:
+    get:
+      tags:
+      - city
+      summary: Find city by ID
+      operationId: getOCityById
+      produces:
+      - application/json
+      parameters:
+      - name: _id
+        in: path
+        description: ID of city that needs to be fetched
+        required: true
+        type: number
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/city'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: City not found
+    put:
+      tags:
+      - city
+      summary: Add an new city
+      operationId: updateCityById
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: _id
+        in: path
+        description: id city that need to be updated
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: City object that needs to be updated in the store
+        required: true
+        schema:
+          $ref: '#/definitions/city'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/city'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: City not found
+        405:
+          description: Validation exception
+    delete:
+      tags:
+      - city
+      summary: Delete city by ID
+      operationId: deleteCityById
+      produces:
+      - application/json
+      parameters:
+      - name: _id
+        in: path
+        description: ID of the city that needs to be deleted
+        required: true
+        type: number
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/city'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: City not found
+  /products:
+    get:
+      tags:
+      - product
+      summary: Return random city
+      operationId: getProducts
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/product'
+        400:
+          description: Invalid status value
+  /products/{id}:
+    get:
+      tags:
+      - product
+      summary: Find product by ID
+      operationId: getProductById
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: ID of product that needs to be fetched
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/city'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: City not found
+    put:
+      tags:
+      - product
+      summary: Add an new product
+      operationId: updateProductById
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: id product that need to be updated
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Product object that needs to be updated in the store
+        required: true
+        schema:
+          $ref: '#/definitions/product'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/product'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Product not found
+        405:
+          description: Validation exception
+    delete:
+      tags:
+      - product
+      summary: Delete product by ID
+      operationId: deleteProductById
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: ID of the product that needs to be deleted
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/product'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Product not found
+  /users:
+    get:
+      tags:
+      - user
+      summary: Return list users
+      operationId: getUsers
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/user'
+        400:
+          description: Invalid status value
+  /users/{id}:
+    delete:
+      tags:
+      - user
+      summary: Delete user by ID
+      operationId: deleteUserById
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: ID of the user that needs to be deleted
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/user'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: User not found
+definitions:
+  city:
+    type: object
+    properties:
+      _id:
+        type: string
+        description: city id
+      name:
+        type: string
+        description: city name
+      country:
+        type: string
+        description: country name
+      location:
+        $ref: '#/definitions/city_location'
+    xml:
+      name: City
+  product:
+    type: object
+    properties:
+      _id:
+        type: string
+        description: db item id
+      reviews:
+        type: array
+        description: id user that reviewed product
+        items:
+          type: string
+      id:
+        type: string
+        description: product id
+      name:
+        type: string
+        description: product name
+      detail:
+        type: string
+        description: product description
+      price:
+        type: number
+        description: product price
+      offer:
+        type: string
+        description: product offer
+      image:
+        type: string
+        description: product string
+    xml:
+      name: Product
+  user:
+    type: object
+    properties:
+      _id:
+        type: number
+        description: db item id
+      id:
+        type: string
+        description: user id
+      name:
+        type: string
+        description: product name
+      phone:
+        type: string
+        description: user phone
+      address:
+        type: string
+        description: user address
+    xml:
+      name: User
+  city_location:
+    properties:
+      lat:
+        type: number
+        minimum: -90
+        maximum: 90
+      lit:
+        type: number
+        minimum: -180
+        maximum: 180
